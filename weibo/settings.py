@@ -16,16 +16,18 @@ DEFAULT_REQUEST_HEADERS = {
 }
 ITEM_PIPELINES = {
     'weibo.pipelines.DuplicatesPipeline': 300,
-    'weibo.pipelines.CsvPipeline': 301,
-    # 'weibo.pipelines.MysqlPipeline': 302,
-    # 'weibo.pipelines.MongoPipeline': 303,
-    # 'weibo.pipelines.MyImagesPipeline': 304,
-    # 'weibo.pipelines.MyVideoPipeline': 305,
-    # 'weibo.pipelines.SQLitePipeline': 306
+    'weibo.pipelines.SupertopicFilterPipeline': 301,  # 新增的超话过滤管道
+    'weibo.pipelines.FilteredJsonPipeline': 302,  # 过滤JSON管道
+    'weibo.pipelines.CsvPipeline': 303,
+    # 'weibo.pipelines.MysqlPipeline': 304,
+    # 'weibo.pipelines.MongoPipeline': 305,
+    # 'weibo.pipelines.MyImagesPipeline': 306,
+    # 'weibo.pipelines.MyVideoPipeline': 307,
+    # 'weibo.pipelines.SQLitePipeline': 308
 }
 # 要搜索的关键词列表，可写多个, 值可以是由关键词或话题组成的列表，也可以是包含关键词的txt文件路径，
 # 如'keyword_list.txt'，txt文件中每个关键词占一行
-KEYWORD_LIST = ['#黄霄云1222生日快乐#','#黄霄雲1222生日快乐']  # 搜索黄霄云生日话题
+KEYWORD_LIST = ['#黄霄云1222生日快乐#', '#黄霄雲1222生日快乐']
 
 # 要搜索的微博类型，0代表搜索全部微博，1代表搜索全部原创微博，2代表热门微博，3代表关注人微博，4代表认证用户微博，5代表媒体微博，6代表观点微博
 WEIBO_TYPE = 1
@@ -35,14 +37,14 @@ CONTAIN_TYPE = 0
 # 具体支持的地名见region.py文件，注意只支持省或直辖市的名字，省下面的市名及直辖市下面的区县名不支持，不筛选请用“全部”
 REGION = ['全部']
 # 搜索的起始日期，为yyyy-mm-dd形式，搜索结果包含该日期
-START_DATE = '2024-12-22'
+START_DATE = '2024-12-09'
 # 搜索的终止日期，为yyyy-mm-dd形式，搜索结果包含该日期
-END_DATE = '2024-12-22'
+END_DATE = '2024-12-11'
 # 进一步细分搜索的阈值，若结果页数大于等于该值，则认为结果没有完全展示，细分搜索条件重新搜索以获取更多微博。数值越大速度越快，也越有可能漏掉微博；数值越小速度越慢，获取的微博就越多。
 # 建议数值大小设置在40到50之间。
 FURTHER_THRESHOLD = 46
 # 爬取结果的数量限制，爬取到该数量的微博后自动停止，设置为0代表不限制
-LIMIT_RESULT = 0
+LIMIT_RESULT = 20
 # 图片文件存储路径
 IMAGES_STORE = './'
 # 视频文件存储路径

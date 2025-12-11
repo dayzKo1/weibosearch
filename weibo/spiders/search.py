@@ -122,9 +122,6 @@ class SearchSpider(scrapy.Spider):
             # 解析当前页面
             for weibo in self.parse_weibo(response):
                 self.check_environment()
-                # 检查是否达到爬取结果数量限制
-                if self.check_limit():
-                    return
                 yield weibo
             next_url = response.xpath(
                 '//a[@class="next"]/@href').extract_first()
@@ -599,14 +596,7 @@ class SearchSpider(scrapy.Spider):
                     retweet['video_url'] = video_url
                     retweet['retweet_id'] = ''
 
-                    # 增加结果计数（转发微博也计入总数）
-                    self.result_count += 1
-
                     yield {'weibo': retweet, 'keyword': keyword}
-
-                    # 检查是否达到爬取结果数量限制
-                    if self.check_limit():
-                        return
 
                     weibo['retweet_id'] = retweet['id']
                 weibo["ip"] = self.get_ip(bid)
@@ -615,8 +605,19 @@ class SearchSpider(scrapy.Spider):
                     "div[@class='card']/div[@class='card-feed']/div[@class='avator']"
                 )
                 if avator:
+                    # 获取用户头像URL
+                    avatar_img = avator.xpath('.//img/@src').extract_first()
+                    if avatar_img:
+                        # 转换为高清头像URL
+                        if avatar_img.startswith('//'):
+                            avatar_img = 'https:' + avatar_img
+                        # 将小头像替换为大头像
+                        avatar_img = avatar_img.replace('/50/', '/180/').replace('_50.jpg', '_180.jpg')
+                        weibo['user_avatar'] = avatar_img
+                    else:
+                        weibo['user_avatar'] = ''
+                    
                     user_auth = avator.xpath('.//svg/@id').extract_first()
-                    print(user_auth)
                     if user_auth == 'woo_svg_vblue':
                         weibo['user_authentication'] = '蓝V'
                     elif user_auth == 'woo_svg_vyellow':
@@ -627,13 +628,8 @@ class SearchSpider(scrapy.Spider):
                         weibo['user_authentication'] = '金V'
                     else:
                         weibo['user_authentication'] = '普通用户'
+                else:
+                    weibo['user_avatar'] = ''
                 print(weibo)
 
-                # 增加结果计数（主微博）
-                self.result_count += 1
-
                 yield {'weibo': weibo, 'keyword': keyword}
-
-                # 检查是否达到爬取结果数量限制
-                if self.check_limit():
-                    return

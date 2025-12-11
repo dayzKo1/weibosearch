@@ -299,3 +299,120 @@ class DuplicatesPipeline(object):
         else:
             self.ids_seen.add(item['weibo']['id'])
             return item
+
+
+class SupertopicFilterPipeline(object):
+    """过滤超话内容的管道 - 只保留来自黄霄云超话的微博，并清理文本"""
+    
+    def __init__(self):
+        self.filtered_count = 0
+        self.passed_count = 0
+    
+    def process_item(self, item, spider):
+        weibo_data = item['weibo']
+        
+        # 只保留来源为"黄霄云超话"的微博，过滤掉其他来源
+        source = weibo_data.get('source', '')
+        if source != '黄霄云超话':
+            self.filtered_count += 1
+            raise DropItem("过滤非超话微博: %s" % item['weibo']['id'])
+        
+        # 清理微博正文中的"黄霄云超话"字段
+        text = weibo_data.get('text', '')
+        if text:
+            # 移除文本开头的"黄霄云超话"
+            cleaned_text = text.replace('黄霄云超话', '').strip()
+            weibo_data['text'] = cleaned_text
+        
+        self.passed_count += 1
+        # 检查是否达到爬取结果数量限制
+        if spider.limit_result > 0 and self.passed_count >= spider.limit_result:
+            print(f'已达到爬取结果数量限制：{spider.limit_result}条，停止爬取')
+            from scrapy.exceptions import CloseSpider
+            raise CloseSpider('已达到爬取结果数量限制')
+        
+        return item
+
+
+class FilteredJsonPipeline(object):
+    """过滤数据并输出为JSON格式"""
+    
+    def __init__(self):
+        import re
+        self.re = re
+        
+    def process_item(self, item, spider):
+        """处理数据项，过滤并格式化输出"""
+        weibo_data = item['weibo']
+        
+        # 过滤微博文本内容
+        filtered_text = self.filter_text(weibo_data.get('text', ''))
+        
+        # 构建过滤后的数据
+        filtered_data = {
+            'user_id': weibo_data.get('user_id', ''),
+            'user_avatar': self.get_user_avatar(weibo_data),
+            'blessing_message': filtered_text,
+            'created_at': weibo_data.get('created_at', ''),
+            'keyword': item.get('keyword', '')
+        }
+        
+        # 只有当祝福消息不为空时才保存
+        if filtered_data['blessing_message'].strip():
+            self.save_filtered_data(filtered_data, item.get('keyword', 'default'))
+        
+        return item
+    
+    def filter_text(self, text):
+        """过滤文本内容，移除话题、@用户等信息"""
+        if not text:
+            return ''
+        
+        # 移除话题标签 #话题#
+        text = self.re.sub(r'#[^#]*#', '', text)
+        
+        # 移除@用户信息
+        text = self.re.sub(r'@[^\s]+', '', text)
+        
+        # 移除多余的空格和换行
+        text = self.re.sub(r'\s+', ' ', text)
+        
+        # 移除首尾空格
+        text = text.strip()
+        
+        return text
+    
+    def get_user_avatar(self, weibo_data):
+        """获取用户头像URL（需要从页面中提取）"""
+        # 这里需要根据实际的HTML结构来提取头像URL
+        # 暂时返回空字符串，后续需要在spider中添加头像提取逻辑
+        return weibo_data.get('user_avatar', '')
+    
+    def save_filtered_data(self, data, keyword):
+        """保存过滤后的数据为JSON格式"""
+        import json
+        import os
+        
+        # 创建输出目录
+        base_dir = '过滤结果' + os.sep + keyword
+        if not os.path.isdir(base_dir):
+            os.makedirs(base_dir)
+        
+        # JSON文件路径
+        json_file = base_dir + os.sep + keyword + '_filtered.json'
+        
+        # 读取现有数据
+        existing_data = []
+        if os.path.exists(json_file):
+            try:
+                with open(json_file, 'r', encoding='utf-8') as f:
+                    existing_data = json.load(f)
+            except (json.JSONDecodeError, FileNotFoundError):
+                existing_data = []
+        
+        # 添加新数据
+        existing_data.append(data)
+        
+        # 保存数据
+        with open(json_file, 'w', encoding='utf-8') as f:
+            json.dump(existing_data, f, ensure_ascii=False, indent=2)

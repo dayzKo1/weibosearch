@@ -1,0 +1,30 @@
+{
+  "keywords": ["#黄霄云1222生日快乐#", "#黄霄雲1222生日快乐"],
+  "interval_minutes": 30,
+  "weibo_type": 1,
+  "contain_type": 0,
+  "region": ["全部"],
+  "further_threshold": 46,
+  "limit_result": 0,
+  "output_dir": "结果文件",
+  "enable_sqlite": false,
+  "enable_mysql": false,
+  "enable_mongo": false,
+  "log_retention_days": 7,
+  "timeout_seconds": 1800,
+  "description": {
+    "keywords": "要搜索的关键词列表",
+    "interval_minutes": "增量更新的时间间隔（分钟）",
+    "weibo_type": "微博类型：0-全部，1-原创，2-热门，3-关注人，4-认证用户，5-媒体，6-观点",
+    "contain_type": "内容类型：0-全部，1-图片，2-视频，3-音乐，4-短链接",
+    "region": "地区筛选，['全部']表示不筛选",
+    "further_threshold": "进一步细分搜索的阈值",
+    "limit_result": "爬取结果数量限制，0表示不限制",
+    "output_dir": "结果文件输出目录",
+    "enable_sqlite": "是否启用SQLite存储",
+    "enable_mysql": "是否启用MySQL存储",
+    "enable_mongo": "是否启用MongoDB存储",
+    "log_retention_days": "日志文件保留天数",
+    "timeout_seconds": "爬虫执行超时时间（秒）"
+  }
+}
