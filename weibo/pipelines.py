@@ -319,7 +319,7 @@ class SupertopicFilterPipeline(object):
             self.filtered_count += 1
             raise DropItem("过滤非超话微博: %s" % item['weibo']['id'])
         
-        # 检查是否包含日期打卡文案
+        # 检查微博正文
         text = weibo_data.get('text', '')
         if text:
             # 过滤包含Day1-Day9或day1-day9等日期打卡文案的微博
@@ -327,9 +327,18 @@ class SupertopicFilterPipeline(object):
                 self.filtered_count += 1
                 raise DropItem("过滤日期打卡微博: %s" % item['weibo']['id'])
             
+            # 只保留包含"生日"关键词的微博
+            if '生日' not in text:
+                self.filtered_count += 1
+                raise DropItem("过滤不含生日关键词微博: %s" % item['weibo']['id'])
+            
             # 清理微博正文中的"黄霄云超话"字段
             cleaned_text = text.replace('黄霄云超话', '').strip()
             weibo_data['text'] = cleaned_text
+        else:
+            # 如果没有正文，也过滤掉
+            self.filtered_count += 1
+            raise DropItem("过滤无正文微博: %s" % item['weibo']['id'])
         
         self.passed_count += 1
         # 检查是否达到爬取结果数量限制
