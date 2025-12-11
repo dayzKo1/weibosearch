@@ -307,6 +307,8 @@ class SupertopicFilterPipeline(object):
     def __init__(self):
         self.filtered_count = 0
         self.passed_count = 0
+        import re
+        self.re = re
     
     def process_item(self, item, spider):
         weibo_data = item['weibo']
@@ -317,10 +319,15 @@ class SupertopicFilterPipeline(object):
             self.filtered_count += 1
             raise DropItem("过滤非超话微博: %s" % item['weibo']['id'])
         
-        # 清理微博正文中的"黄霄云超话"字段
+        # 检查是否包含日期打卡文案
         text = weibo_data.get('text', '')
         if text:
-            # 移除文本开头的"黄霄云超话"
+            # 过滤包含Day1-Day9或day1-day9等日期打卡文案的微博
+            if self.re.search(r'[Dd]ay\s*[0-9]+', text):
+                self.filtered_count += 1
+                raise DropItem("过滤日期打卡微博: %s" % item['weibo']['id'])
+            
+            # 清理微博正文中的"黄霄云超话"字段
             cleaned_text = text.replace('黄霄云超话', '').strip()
             weibo_data['text'] = cleaned_text
         
