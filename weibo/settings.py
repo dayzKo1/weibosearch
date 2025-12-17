@@ -44,7 +44,7 @@ END_DATE = '2024-12-11'
 # 建议数值大小设置在40到50之间。
 FURTHER_THRESHOLD = 46
 # 爬取结果的数量限制，爬取到该数量的微博后自动停止，设置为0代表不限制
-LIMIT_RESULT = 20
+LIMIT_RESULT = 0
 # 图片文件存储路径
 IMAGES_STORE = './'
 # 视频文件存储路径
