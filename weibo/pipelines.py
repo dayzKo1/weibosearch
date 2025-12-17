@@ -346,11 +346,19 @@ class SupertopicFilterPipeline(object):
 
 
 class FilteredJsonPipeline(object):
-    """过滤数据并输出为JSON格式"""
+    """过滤数据并输出为JSON格式，统一输出到blessData.json，相同user_id去重保留最新记录"""
     
     def __init__(self):
         import re
+        import json
+        import os
+        from datetime import datetime
         self.re = re
+        self.json = json
+        self.os = os
+        self.datetime = datetime
+        self.bless_data_file = '过滤结果' + os.sep + 'blessData.json'
+        self.data_cache = {}  # 用于缓存数据，key为user_id
         
     def process_item(self, item, spider):
         """处理数据项，过滤并格式化输出"""
@@ -370,7 +378,7 @@ class FilteredJsonPipeline(object):
         
         # 只有当祝福消息不为空时才保存
         if filtered_data['blessing_message'].strip():
-            self.save_filtered_data(filtered_data, item.get('keyword', 'default'))
+            self.save_filtered_data(filtered_data)
         
         return item
     
@@ -398,31 +406,69 @@ class FilteredJsonPipeline(object):
         # 获取用户名信息
         return weibo_data.get('username', '')
     
-    def save_filtered_data(self, data, keyword):
-        """保存过滤后的数据为JSON格式"""
-        import json
-        import os
-        
-        # 创建输出目录
-        base_dir = '过滤结果' + os.sep + keyword
-        if not os.path.isdir(base_dir):
-            os.makedirs(base_dir)
-        
-        # JSON文件路径
-        json_file = base_dir + os.sep + keyword + '_filtered.json'
-        
-        # 读取现有数据
-        existing_data = []
-        if os.path.exists(json_file):
+    def parse_date(self, date_str):
+        """解析日期字符串为datetime对象"""
+        try:
+            # 尝试解析 "2025-12-17 22:55" 格式
+            return self.datetime.strptime(date_str, '%Y-%m-%d %H:%M')
+        except ValueError:
             try:
-                with open(json_file, 'r', encoding='utf-8') as f:
-                    existing_data = json.load(f)
-            except (json.JSONDecodeError, FileNotFoundError):
-                existing_data = []
+                # 尝试解析 "2025-12-17" 格式
+                return self.datetime.strptime(date_str, '%Y-%m-%d')
+            except ValueError:
+                # 如果都失败，返回一个很早的时间
+                return self.datetime(1970, 1, 1)
+    
+    def save_filtered_data(self, data):
+        """保存过滤后的数据为JSON格式，统一输出到blessData.json"""
+        user_id = data['user_id']
         
-        # 添加新数据
-        existing_data.append(data)
+        # 检查是否已有该用户的数据
+        if user_id in self.data_cache:
+            # 比较时间，保留最新的记录
+            existing_date = self.parse_date(self.data_cache[user_id]['created_at'])
+            new_date = self.parse_date(data['created_at'])
+            
+            if new_date > existing_date:
+                self.data_cache[user_id] = data
+        else:
+            self.data_cache[user_id] = data
+        
+        # 每次处理完数据后都更新文件
+        self.update_bless_data_file()
+    
+    def update_bless_data_file(self):
+        """更新blessData.json文件"""
+        # 创建输出目录
+        base_dir = '过滤结果'
+        if not self.os.path.isdir(base_dir):
+            self.os.makedirs(base_dir)
+        
+        # 将缓存数据转换为列表
+        data_list = list(self.data_cache.values())
+        
+        # 按创建时间排序（最新的在前）
+        data_list.sort(key=lambda x: self.parse_date(x['created_at']), reverse=True)
         
         # 保存数据
-        with open(json_file, 'w', encoding='utf-8') as f:
-            json.dump(existing_data, f, ensure_ascii=False, indent=2)
+        with open(self.bless_data_file, 'w', encoding='utf-8') as f:
+            self.json.dump(data_list, f, ensure_ascii=False, indent=2)
+    
+    def open_spider(self, spider):
+        """爬虫开始时加载现有数据"""
+        if self.os.path.exists(self.bless_data_file):
+            try:
+                with open(self.bless_data_file, 'r', encoding='utf-8') as f:
+                    existing_data = self.json.load(f)
+                    # 将现有数据加载到缓存中
+                    for item in existing_data:
+                        user_id = item.get('user_id')
+                        if user_id:
+                            self.data_cache[user_id] = item
+            except (self.json.JSONDecodeError, FileNotFoundError):
+                self.data_cache = {}
+    
+    def close_spider(self, spider):
+        """爬虫结束时最终保存数据"""
+        self.update_bless_data_file()
+        print(f"数据已保存到 {self.bless_data_file}，共 {len(self.data_cache)} 条记录")
