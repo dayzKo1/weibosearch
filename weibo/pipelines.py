@@ -326,12 +326,7 @@ class SupertopicFilterPipeline(object):
             if self.re.search(r'[Dd]ay\s*[0-9]+', text):
                 self.filtered_count += 1
                 raise DropItem("过滤日期打卡微博: %s" % item['weibo']['id'])
-            
-            # 只保留包含"生日"关键词的微博
-            if '生日' not in text:
-                self.filtered_count += 1
-                raise DropItem("过滤不含生日关键词微博: %s" % item['weibo']['id'])
-            
+      
             # 清理微博正文中的"黄霄云超话"字段
             cleaned_text = text.replace('黄霄云超话', '').strip()
             weibo_data['text'] = cleaned_text
