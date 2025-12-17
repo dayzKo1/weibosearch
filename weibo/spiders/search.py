@@ -613,9 +613,9 @@ class SearchSpider(scrapy.Spider):
                             avatar_img = 'https:' + avatar_img
                         # 将小头像替换为大头像
                         avatar_img = avatar_img.replace('/50/', '/180/').replace('_50.jpg', '_180.jpg')
-                        weibo['user_avatar'] = avatar_img
+                        weibo['username'] = avatar_img
                     else:
-                        weibo['user_avatar'] = ''
+                        weibo['username'] = ''
                     
                     user_auth = avator.xpath('.//svg/@id').extract_first()
                     if user_auth == 'woo_svg_vblue':
@@ -629,7 +629,7 @@ class SearchSpider(scrapy.Spider):
                     else:
                         weibo['user_authentication'] = '普通用户'
                 else:
-                    weibo['user_avatar'] = ''
+                    weibo['username'] = ''
                 print(weibo)
 
                 yield {'weibo': weibo, 'keyword': keyword}

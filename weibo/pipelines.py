@@ -362,7 +362,7 @@ class FilteredJsonPipeline(object):
         # 构建过滤后的数据
         filtered_data = {
             'user_id': weibo_data.get('user_id', ''),
-            'user_avatar': self.get_user_avatar(weibo_data),
+            'username': self.get_username(weibo_data),
             'blessing_message': filtered_text,
             'created_at': weibo_data.get('created_at', ''),
             'keyword': item.get('keyword', '')
@@ -393,11 +393,10 @@ class FilteredJsonPipeline(object):
         
         return text
     
-    def get_user_avatar(self, weibo_data):
-        """获取用户头像URL（需要从页面中提取）"""
-        # 这里需要根据实际的HTML结构来提取头像URL
-        # 暂时返回空字符串，后续需要在spider中添加头像提取逻辑
-        return weibo_data.get('user_avatar', '')
+    def get_username(self, weibo_data):
+        """获取用户名"""
+        # 获取用户名信息
+        return weibo_data.get('username', '')
     
     def save_filtered_data(self, data, keyword):
         """保存过滤后的数据为JSON格式"""
