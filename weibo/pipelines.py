@@ -403,8 +403,8 @@ class FilteredJsonPipeline(object):
     
     def get_username(self, weibo_data):
         """获取用户名"""
-        # 获取用户名信息
-        return weibo_data.get('username', '')
+        # 直接获取screen_name作为用户名
+        return weibo_data.get('screen_name', '')
     
     def parse_date(self, date_str):
         """解析日期字符串为datetime对象"""
