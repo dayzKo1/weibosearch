@@ -12,7 +12,7 @@ DEFAULT_REQUEST_HEADERS = {
     'Accept':
     'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,en-US;q=0.7',
-    'cookie': '_T_WM=14671975742; ALF=1767927501; M_WEIBOCN_PARAMS=uicode%3D20000174; MLOGIN=1; mweibo_short_token=45bf84f63a; SCF=Au-JX9KdPA4AQw8XbsThp_7Hg596EgHbogMTY9VvJMh9h9sHAp8R30vqKTPMLQcUbvPUGacSK4cBuEgX2HL3xyE.; SUB=_2A25EPJGdDeRhGeBJ7lcZ-SnEyzWIHXVnM6tVrDV6PUJbktAYLWOikW1NRlaA2CS39rt9ager7sLA9xzHx2bQlnPy; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WhONY9ps5-7IolWluJsN4v65NHD95QcS0-f1h.N1h54Ws4DqcjZqgpjUPiL9s84wntt; WEIBOCN_FROM=1110006030; XSRF-TOKEN=731472',
+    'cookie': '_T_WM=51953462276; ALF=1768139980; M_WEIBOCN_PARAMS=luicode%3D20000174%26uicode%3D20000174; MLOGIN=1; mweibo_short_token=b0c9767a24; SCF=Au5QZAtY5xXKsbQlPogWkovJRf44Xfu5o3xIyn5F-IfA6_ui69Ehi5DtoHbs6tE46rb4GCJwO19yjDvfGBZ8xuw.; SUB=_2A25EOG-cDeRhGeBJ7lcZ-SnEyzWIHXVnNO1UrDV6PUJbktANLWf2kW1NRlaA2C3y8vFf66X1z_cDgZ_mGjBO9JgQ; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WhONY9ps5-7IolWluJsN4v65JpX5K-hUgL.FoqNSK-R1KMReh.2dJLoI7DydspfMJH.qPLA; WEIBOCN_FROM=1110006030; XSRF-TOKEN=014e45',
 }
 ITEM_PIPELINES = {
     'weibo.pipelines.DuplicatesPipeline': 300,
@@ -27,7 +27,7 @@ ITEM_PIPELINES = {
 }
 # 要搜索的关键词列表，可写多个, 值可以是由关键词或话题组成的列表，也可以是包含关键词的txt文件路径，
 # 如'keyword_list.txt'，txt文件中每个关键词占一行
-KEYWORD_LIST = ['#黄霄云1222生日快乐#', '#黄霄雲1222生日快乐']
+KEYWORD_LIST = ['#黄霄云1222生日快乐#', '#黄霄雲1222生日快乐',' #黄霄雲宇宙无敌号天津演唱会#','#黄霄云宇宙无敌号天津演唱会#']
 
 # 要搜索的微博类型，0代表搜索全部微博，1代表搜索全部原创微博，2代表热门微博，3代表关注人微博，4代表认证用户微博，5代表媒体微博，6代表观点微博
 WEIBO_TYPE = 1
